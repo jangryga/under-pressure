@@ -1,4 +1,4 @@
-from test_runner import TestRunner
+from test_runner.runner import TestRunner
 
 def main():
     tr = TestRunner()

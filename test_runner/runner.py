@@ -12,18 +12,19 @@ class TestRunner:
 
     def __init__(self):
         self.packages = []
+        self.excluded_packages = ["test_runner", ".git"]
 
     def walk_packages(self) -> List[str]:
         print("Walking directory tree")
         for d_path, d_names, _ in os.walk("."):
             if d_path == ".":
-                self.packages = d_names
+                self.packages = [name for name in d_names if name not in self.excluded_packages]
             
     def create_tests(self):
         print("Creating tests")
 
         def make_test_method(path_name):
-            module = importlib.import_module(path_name)
+            module = importlib.import_module(f"{path_name}.{path_name}")
             file_name = f"./{path_name}/test_data.json"
             try:
                 func = getattr(module, path_name)
@@ -43,7 +44,6 @@ class TestRunner:
             test_name = f"test_{path_name}"
             setattr(TestSuite, test_name, make_test_method(path_name))
 
-        print(TestSuite.__dict__)
         print(f"    Created {len(self.packages)} tests")
 
     def execute_tests(self):
