@@ -1,4 +1,5 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect, useRef } from "react";
+import { parse } from "lexer-rs";
 
 export default function App() {
   return (
@@ -8,15 +9,99 @@ export default function App() {
   );
 }
 
+const context: {
+  savedSelection: {
+    start: number;
+    end: number;
+  };
+  parsedContent: any;
+} = {
+  savedSelection: {
+    start: 0,
+    end: 0,
+  },
+  parsedContent: "",
+};
+
+function saveSelection(containerEl: HTMLDivElement) {
+  const range = window.getSelection()?.getRangeAt(0);
+  const preSelectionRange = range?.cloneRange();
+  preSelectionRange?.selectNodeContents(containerEl);
+  preSelectionRange!.setEnd(range!.startContainer, range!.startOffset);
+  const start = preSelectionRange!.toString().length;
+
+  context.savedSelection = { start: start, end: start + range!.toString().length };
+}
+
+function restoreSelection(containerEl: HTMLDivElement, savedSel: any) {
+  let charIndex = 0;
+  let range = document.createRange();
+  range.setStart(containerEl, 0);
+  range.collapse(true);
+  let nodeStack: Node[] = [containerEl];
+  let node: Node | undefined;
+  let foundStart = false;
+  let stop = false;
+
+  while (!stop && (node = nodeStack.pop())) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const textNode = node as Text; // TypeScript type assertion
+      const nextCharIndex = charIndex + textNode.length;
+      if (!foundStart && savedSel.start >= charIndex && savedSel.start <= nextCharIndex) {
+        range.setStart(textNode, savedSel.start - charIndex);
+        foundStart = true;
+      }
+      if (foundStart && savedSel.end >= charIndex && savedSel.end <= nextCharIndex) {
+        range.setEnd(textNode, savedSel.end - charIndex);
+        stop = true;
+      }
+      charIndex = nextCharIndex;
+    } else {
+      let i = node.childNodes.length;
+      while (i--) {
+        nodeStack.push(node.childNodes[i]);
+      }
+    }
+  }
+
+  const sel = window.getSelection();
+  sel!.removeAllRanges();
+  sel!.addRange(range);
+}
+
 function Editor() {
   const [content, setContent] = useState<string>("");
+  // const [parsedContent, setParsedContent] = useState<any>("");
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current!.innerHTML = content;
+    restoreSelection(ref.current!, context.savedSelection);
+    console.log(parse("def"));
+    // context.parsedContent = ;
+  }, [content]);
+
   return (
-    <div
-      contentEditable
-      className="w-full h-full focus:outline-none pl-4"
-      onChange={(e) => setContent(e.currentTarget.innerHTML)}
-      dangerouslySetInnerHTML={{ __html: content }}
-    />
+    <>
+      <div>{JSON.stringify(context.parsedContent)}</div>
+      <div
+        ref={ref}
+        contentEditable
+        className="w-full h-full focus:outline-none pl-4"
+        onInput={(e) => {
+          saveSelection(ref.current!);
+          setContent(e.currentTarget.textContent ?? "");
+        }}
+      />
+      <button
+        onClick={() => {
+          console.log(content);
+          let parsed = parse(content);
+          console.log(parsed);
+        }}>
+        Parse
+      </button>
+      <button onClick={() => console.log(window.getSelection())}>curr selection</button>
+    </>
   );
 }
 
