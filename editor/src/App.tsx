@@ -1,11 +1,22 @@
 import { ReactNode, useState, useEffect, useRef } from "react";
-import { Canvas } from "./lib/canvas_manager";
+import { CanvasProvider, useCanvasContext, useUpdateContext } from "./lib/canvas_manager";
+import { LexerWrapper } from "lexer-rs";
 
 export default function App() {
   return (
-    <Container>
-      <EditorContainer />
-    </Container>
+    <CanvasProvider initialContext={{ lexer: new LexerWrapper(), tokens: [], tree: <div /> }}>
+      <Container>
+        <EditorContainer />
+      </Container>
+    </CanvasProvider>
+  );
+}
+
+function Container({ children }: { children: ReactNode }) {
+  return (
+    <body className="w-screen bg-primary-900 h-screen text-gray-100 flex">
+      <div className="max-w-7xl m-auto">{children}</div>
+    </body>
   );
 }
 
@@ -22,15 +33,6 @@ const context: {
   },
   parsedContent: "",
 };
-
-let cv: Canvas | null = null;
-
-function getCanvas(): Canvas {
-  if (!cv) {
-    cv = new Canvas();
-  }
-  return cv;
-}
 
 function saveSelection(containerEl: HTMLDivElement) {
   const range = window.getSelection()?.getRangeAt(0);
@@ -79,52 +81,57 @@ function restoreSelection(containerEl: HTMLDivElement, savedSel: any) {
 }
 
 function Editor() {
-  const [content, setContent] = useState<string>("");
+  const context = useCanvasContext();
+  const updateContext = useUpdateContext();
   const ref = useRef<HTMLDivElement>(null);
-  const canvas = getCanvas();
-  useEffect(() => {
-    ref.current!.innerHTML = content;
-    restoreSelection(ref.current!, context.savedSelection);
-    console.log(canvas.tokenize(content));
-  }, [content]);
 
   return (
-    <>
-      <div>{JSON.stringify(context.parsedContent)}</div>
+    <div>
+      <div>{JSON.stringify(context.tokens)}</div>
       <div
         ref={ref}
         contentEditable
         className="w-full h-full focus:outline-none pl-4"
         onInput={(e) => {
           saveSelection(ref.current!);
-          setContent(e.currentTarget.textContent ?? "");
+          // setContent(e.currentTarget.textContent ?? "");
+          updateContext(e.currentTarget.textContent ?? "");
         }}
       />
-      {/* <button
-        onClick={() => {
-          console.log(content);
-          let parsed = parse(content);
-          console.log(parsed);
-        }}>
-        Parse
-      </button> */}
-      <button onClick={() => console.log(window.getSelection())}>curr selection</button>
-    </>
+    </div>
   );
 }
+
+// function Editor() {
+//   const [content, setContent] = useState<string>("");
+
+//   useEffect(() => {
+//     ref.current!.innerHTML = content;
+//     restoreSelection(ref.current!, context.savedSelection);
+//     console.log(canvas.tokenize(content));
+//   }, [content]);
+
+//   return (
+//     <>
+
+//       />
+//       {/* <button
+//         onClick={() => {
+//           console.log(content);
+//           let parsed = parse(content);
+//           console.log(parsed);
+//         }}>
+//         Parse
+//       </button> */}
+//       <button onClick={() => console.log(window.getSelection())}>curr selection</button>
+//     </>
+//   );
+// }
 
 function EditorContainer() {
   return (
     <div className="w-full md:w-[700px] lg:w-[1000px] bg-primary-900 h-[600px] border border-[#383838]">
       <Editor />
     </div>
-  );
-}
-
-function Container({ children }: { children: ReactNode }) {
-  return (
-    <body className="w-screen bg-primary-900 h-screen text-gray-100 flex">
-      <div className="max-w-7xl m-auto">{children}</div>
-    </body>
   );
 }
