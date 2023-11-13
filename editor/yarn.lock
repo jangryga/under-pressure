@@ -2146,9 +2146,9 @@ levn@^0.4.1:
     type-check "~0.4.0"
 
 lexer-rs@^0.1.0:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/lexer-rs/-/lexer-rs-0.1.1.tgz#870991cc578c50acbdc853b59a4ef432d9c2d138"
-  integrity sha512-0yhfGVGXJSYSpns3zIq+4Mek5sHyNgXyrJ/ad1eGjdDzn64aqSBCzgsht9fWJy3DXxpCow4LCDilXpZqJ1nckQ==
+  version "0.1.23"
+  resolved "https://registry.yarnpkg.com/lexer-rs/-/lexer-rs-0.1.23.tgz#278724310ee66d51b51b080959121241dadd25d1"
+  integrity sha512-HaCD3J5OcyAIDawpBGxv4qJMFC9cIpCrWukHyLZ4G7IC47Jj0mUDwVIozp5Fp88H3RvltdYfmok2SOGg1PcvUg==
 
 lilconfig@^2.0.5, lilconfig@^2.1.0:
   version "2.1.0"

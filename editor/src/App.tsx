@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect, useRef } from "react";
-import { parse } from "lexer-rs";
+import { Canvas } from "./lib/canvas_manager";
 
 export default function App() {
   return (
@@ -22,6 +22,15 @@ const context: {
   },
   parsedContent: "",
 };
+
+let cv: Canvas | null = null;
+
+function getCanvas(): Canvas {
+  if (!cv) {
+    cv = new Canvas();
+  }
+  return cv;
+}
 
 function saveSelection(containerEl: HTMLDivElement) {
   const range = window.getSelection()?.getRangeAt(0);
@@ -71,13 +80,12 @@ function restoreSelection(containerEl: HTMLDivElement, savedSel: any) {
 
 function Editor() {
   const [content, setContent] = useState<string>("");
-  // const [parsedContent, setParsedContent] = useState<any>("");
   const ref = useRef<HTMLDivElement>(null);
+  const canvas = getCanvas();
   useEffect(() => {
     ref.current!.innerHTML = content;
     restoreSelection(ref.current!, context.savedSelection);
-    console.log(parse("def"));
-    // context.parsedContent = ;
+    console.log(canvas.tokenize(content));
   }, [content]);
 
   return (
@@ -92,14 +100,14 @@ function Editor() {
           setContent(e.currentTarget.textContent ?? "");
         }}
       />
-      <button
+      {/* <button
         onClick={() => {
           console.log(content);
           let parsed = parse(content);
           console.log(parsed);
         }}>
         Parse
-      </button>
+      </button> */}
       <button onClick={() => console.log(window.getSelection())}>curr selection</button>
     </>
   );
