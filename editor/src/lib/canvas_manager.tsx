@@ -1,26 +1,11 @@
-import { TokenType, Token, LexerWrapper } from "lexer-rs";
-import {
-  Fragment,
-  PropsWithChildren,
-  ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useReducer,
-} from "react";
+import { TokenType, LexerWrapper } from "lexer-rs";
+import { ReactNode, createContext, useCallback, useContext, useReducer } from "react";
 
 interface CanvasContextType {
   tokens: TokenType[];
   lexer: LexerWrapper;
   tree: ReactNode;
 }
-
-// const initialContext: CanvasContextType = {
-//   lexer: new LexerWrapper(),
-//   tokens: [],
-//   tree: <div />,
-// };
-
 type CanvasActionType = { type: "SET"; payload: string };
 type UseCanvasManagerResult = ReturnType<typeof useCanvasManager>;
 

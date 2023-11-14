@@ -66,8 +66,9 @@ function Canvas() {
   const context = useCanvasContext();
   const updateContext = useUpdateContext();
   const ref = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    console.log("changed tokens");
+    // console.log(Array.from(ref.current?.innerText ?? "").map((t) => t.charCodeAt(0)));
     // ref.current!.innerHTML = context.tree!;
     // restoreSelection(ref.current!, context.savedSelection);
   }, [context.tokens]);
@@ -80,40 +81,14 @@ function Canvas() {
         contentEditable
         className="w-full h-full focus:outline-none pl-4"
         onInput={(e) => {
+          console.log(Array.from(e.currentTarget.textContent ?? ""));
           saveSelection(ref.current!);
-          // setContent(e.currentTarget.textContent ?? "");
-          updateContext(e.currentTarget.textContent ?? "");
+          updateContext(ref.current!.innerText);
         }}
       />
     </div>
   );
 }
-
-// function Editor() {
-//   const [content, setContent] = useState<string>("");
-
-//   useEffect(() => {
-//     ref.current!.innerHTML = content;
-//     restoreSelection(ref.current!, context.savedSelection);
-//     console.log(canvas.tokenize(content));
-//   }, [content]);
-
-//   return (
-//     <>
-
-//       />
-//       {/* <button
-//         onClick={() => {
-//           console.log(content);
-//           let parsed = parse(content);
-//           console.log(parsed);
-//         }}>
-//         Parse
-//       </button> */}
-//       <button onClick={() => console.log(window.getSelection())}>curr selection</button>
-//     </>
-//   );
-// }
 
 function EditorWrapper() {
   return (
