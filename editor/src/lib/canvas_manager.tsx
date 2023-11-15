@@ -1,5 +1,6 @@
 import { TokenType, LexerWrapper } from "lexer-rs";
 import { ReactNode, createContext, useCallback, useContext, useReducer } from "react";
+import { renderElement } from "./render_tree";
 
 interface CanvasContextType {
   tokens: TokenType[];
@@ -12,15 +13,18 @@ type UseCanvasManagerResult = ReturnType<typeof useCanvasManager>;
 const CanvasContext = createContext<UseCanvasManagerResult>({
   context: null as any,
   updateTree: (_: string) => {},
+  _renderElement: (_: TokenType) => <div />,
 });
 
 function useCanvasManager(initialCanvasContext: CanvasContextType): {
   context: CanvasContextType;
   updateTree: (text: string) => void;
+  _renderElement: (token: TokenType) => JSX.Element;
 } {
   const [context, dispatch] = useReducer((state: CanvasContextType, action: CanvasActionType) => {
     switch (action.type) {
       case "SET": {
+        // const newTree =
         return {
           ...state,
           tokens: state.lexer.tokenize(action.payload),
@@ -35,7 +39,9 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
     dispatch({ type: "SET", payload: text });
   }, []);
 
-  return { context, updateTree };
+  const _renderElement = useCallback(renderElement, []);
+
+  return { context, updateTree, _renderElement };
 }
 
 export const CanvasProvider = ({
@@ -58,4 +64,9 @@ export const useUpdateContext = (): UseCanvasManagerResult["updateTree"] => {
 export const useCanvasContext = (): UseCanvasManagerResult["context"] => {
   const { context } = useContext(CanvasContext);
   return context;
+};
+
+export const useRenderElement = (): UseCanvasManagerResult["_renderElement"] => {
+  const { _renderElement } = useContext(CanvasContext);
+  return _renderElement;
 };

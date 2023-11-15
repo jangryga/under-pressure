@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { TextEditor } from "./lib/canvas";
+import { TextEditor } from "./lib/Canvas";
 
 export default function App() {
   return (

@@ -1,6 +1,12 @@
-import { LexerWrapper } from "lexer-rs";
-import { CanvasProvider, useCanvasContext, useUpdateContext } from "./canvas_manager";
-import { useEffect, useRef } from "react";
+import { LexerWrapper, TokenCategory, TokenKind, TokenType } from "lexer-rs";
+import {
+  CanvasProvider,
+  useCanvasContext,
+  useRenderElement,
+  useUpdateContext,
+} from "./canvas_manager";
+import { createElement, useEffect, useRef } from "react";
+import { renderElement } from "./render_tree";
 
 const context: {
   savedSelection: {
@@ -66,6 +72,13 @@ function Canvas() {
   const context = useCanvasContext();
   const updateContext = useUpdateContext();
   const ref = useRef<HTMLDivElement>(null);
+  const renderElement = useRenderElement();
+
+  const token: TokenType = {
+    category: TokenCategory.Identifier,
+    kind: TokenKind.Ident,
+    value: "def",
+  };
 
   useEffect(() => {
     // console.log(Array.from(ref.current?.innerText ?? "").map((t) => t.charCodeAt(0)));
@@ -75,13 +88,14 @@ function Canvas() {
 
   return (
     <div>
+      <div>{renderElement(token)}</div>
       <div>{JSON.stringify(context.tokens)}</div>
       <div
         ref={ref}
         contentEditable
         className="w-full h-full focus:outline-none pl-4"
-        onInput={(e) => {
-          console.log(Array.from(e.currentTarget.textContent ?? ""));
+        onInput={(_) => {
+          console.log(Array.from(ref.current!.innerText ?? "").map((s) => s.charCodeAt(0)));
           saveSelection(ref.current!);
           updateContext(ref.current!.innerText);
         }}
