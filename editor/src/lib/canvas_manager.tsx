@@ -5,7 +5,7 @@ import { renderElement } from "./render_tree";
 interface CanvasContextType {
   tokens: TokenType[];
   lexer: LexerWrapper;
-  tree: ReactNode;
+  tree: JSX.Element[];
 }
 type CanvasActionType = { type: "SET"; payload: string };
 type UseCanvasManagerResult = ReturnType<typeof useCanvasManager>;
@@ -24,10 +24,13 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
   const [context, dispatch] = useReducer((state: CanvasContextType, action: CanvasActionType) => {
     switch (action.type) {
       case "SET": {
-        // const newTree =
+        const tokens = state.lexer.tokenize(action.payload);
+        const tree = tokens.map((t: TokenType) => renderElement(t));
+        console.log("new tree", tree);
         return {
           ...state,
-          tokens: state.lexer.tokenize(action.payload),
+          tokens,
+          tree,
         };
       }
       default:

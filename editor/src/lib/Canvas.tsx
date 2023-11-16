@@ -1,12 +1,11 @@
-import { LexerWrapper, TokenCategory, TokenKind, TokenType } from "lexer-rs";
+import { LexerWrapper, TokenCategory, TokenKind } from "lexer-rs";
 import {
   CanvasProvider,
   useCanvasContext,
   useRenderElement,
   useUpdateContext,
 } from "./canvas_manager";
-import { createElement, useEffect, useRef } from "react";
-import { renderElement } from "./render_tree";
+import { useEffect, useRef, useState } from "react";
 
 const context: {
   savedSelection: {
@@ -72,35 +71,49 @@ function Canvas() {
   const context = useCanvasContext();
   const updateContext = useUpdateContext();
   const ref = useRef<HTMLDivElement>(null);
-  const renderElement = useRenderElement();
+  const render = useRenderElement();
+  const [ts, setTs] = useState<JSX.Element[]>([]);
 
-  const token: TokenType = {
-    category: TokenCategory.Identifier,
-    kind: TokenKind.Ident,
-    value: "def",
-  };
+  const e = render({ category: TokenCategory.Identifier, value: "abce", kind: TokenKind.Ident });
 
-  useEffect(() => {
-    // console.log(Array.from(ref.current?.innerText ?? "").map((t) => t.charCodeAt(0)));
-    // ref.current!.innerHTML = context.tree!;
-    // restoreSelection(ref.current!, context.savedSelection);
-  }, [context.tokens]);
+  // useEffect(() => {
+  //   // console.log(Array.from(ref.current?.innerText ?? "").map((t) => t.charCodeAt(0)));
+  //   // ref.current!.innerHTML = context.tree!;
+  //   // restoreSelection(ref.current!, context.savedSelection);
+  //   const _tokens = context.tokens.map((t) => render(t));
+  //   setTs(_tokens);
+  // }, [context.tokens]);
+
+  // console.log("e is: ", e);
 
   return (
     <div>
-      <div>{renderElement(token)}</div>
+      {e}
+      <Elements />
       <div>{JSON.stringify(context.tokens)}</div>
       <div
         ref={ref}
         contentEditable
         className="w-full h-full focus:outline-none pl-4"
         onInput={(_) => {
-          console.log(Array.from(ref.current!.innerText ?? "").map((s) => s.charCodeAt(0)));
+          // console.log(Array.from(ref.current!.innerText ?? "").map((s) => s.charCodeAt(0)));
           saveSelection(ref.current!);
           updateContext(ref.current!.innerText);
         }}
       />
     </div>
+  );
+}
+
+function Elements() {
+  const tree = useCanvasContext().tree;
+
+  return (
+    <>
+      {tree.map((e, idx) => (
+        <div key={idx}>{e}</div>
+      ))}
+    </>
   );
 }
 
@@ -114,7 +127,7 @@ function EditorWrapper() {
 
 export function TextEditor() {
   return (
-    <CanvasProvider initialContext={{ lexer: new LexerWrapper(), tokens: [], tree: <div /> }}>
+    <CanvasProvider initialContext={{ lexer: new LexerWrapper(), tokens: [], tree: [] }}>
       <EditorWrapper />
     </CanvasProvider>
   );

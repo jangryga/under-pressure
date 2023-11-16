@@ -1,4 +1,5 @@
-import { TokenType, TokenCategory } from "lexer-rs";
+import { TokenType, TokenCategory, TokenKind } from "lexer-rs";
+import { tokenLookup } from "./token_table";
 
 const style = [
   "text-red",
@@ -16,12 +17,19 @@ const style = [
 
 export function renderElement(token: TokenType) {
   const className = style[token.category];
-  switch (token.kind) {
-    case 0:
-      return <span>" "</span>;
-    case 186 /** Ident */:
+  switch (TokenKind[token.kind] as any) {
+    case 1: {
+      console.error("Dedent detected");
+      return <span />;
+    }
+    case 185:
+      return <span />;
+    case 186:
       return <span className={className}>{token.value}</span>;
+    case 187:
+      return <br />;
     default:
-      throw new Error(`Unknown token ${token}`);
+      console.log("returning default element: ");
+      return <span className={className}>{tokenLookup(TokenKind[token.kind] as any)}</span>;
   }
 }
