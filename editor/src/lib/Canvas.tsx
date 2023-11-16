@@ -5,7 +5,7 @@ import {
   useRenderElement,
   useUpdateContext,
 } from "./canvas_manager";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 const context: {
   savedSelection: {
@@ -74,8 +74,6 @@ function Canvas() {
   const render = useRenderElement();
   const [ts, setTs] = useState<JSX.Element[]>([]);
 
-  const e = render({ category: TokenCategory.Identifier, value: "abce", kind: TokenKind.Ident });
-
   // useEffect(() => {
   //   // console.log(Array.from(ref.current?.innerText ?? "").map((t) => t.charCodeAt(0)));
   //   // ref.current!.innerHTML = context.tree!;
@@ -84,11 +82,8 @@ function Canvas() {
   //   setTs(_tokens);
   // }, [context.tokens]);
 
-  // console.log("e is: ", e);
-
   return (
     <div>
-      {e}
       <Elements />
       <div>{JSON.stringify(context.tokens)}</div>
       <div
@@ -96,7 +91,6 @@ function Canvas() {
         contentEditable
         className="w-full h-full focus:outline-none pl-4"
         onInput={(_) => {
-          // console.log(Array.from(ref.current!.innerText ?? "").map((s) => s.charCodeAt(0)));
           saveSelection(ref.current!);
           updateContext(ref.current!.innerText);
         }}

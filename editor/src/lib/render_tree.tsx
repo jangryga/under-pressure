@@ -2,22 +2,23 @@ import { TokenType, TokenCategory, TokenKind } from "lexer-rs";
 import { tokenLookup } from "./token_table";
 
 const style = [
-  "text-red",
+  "text-red-900",
+  "text-gray-500",
   "text-black",
-  "text-black",
-  "text-green",
-  "text-yellow",
-  "text-blue",
-  "text-orange",
-  "text-magenta",
+  "text-green-400",
+  "text-yellow-600",
+  "text-blue-700",
+  "text-orang800",
+  "text-magenta-500",
   "text-red-200",
   "text-black",
   "text-black",
 ];
 
 export function renderElement(token: TokenType) {
-  const className = style[token.category];
-  switch (TokenKind[token.kind] as any) {
+  const className = style[TokenCategory[token.category as any] as any];
+  // @ts-ignore
+  switch (TokenKind[token.kind]) {
     case 1: {
       console.error("Dedent detected");
       return <span />;
@@ -29,7 +30,7 @@ export function renderElement(token: TokenType) {
     case 187:
       return <br />;
     default:
-      console.log("returning default element: ");
-      return <span className={className}>{tokenLookup(TokenKind[token.kind] as any)}</span>;
+      // @ts-ignore
+      return <span className={className}>{tokenLookup(TokenKind[token.kind])}</span>;
   }
 }
