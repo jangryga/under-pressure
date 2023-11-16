@@ -4,7 +4,7 @@ import {
   useCanvasContext,
   useRenderElement,
   useUpdateContext,
-} from "./canvas_manager";
+} from "./canvas_context";
 import { useRef, useState } from "react";
 
 const context: {

@@ -1,6 +1,6 @@
 import { TokenType, LexerWrapper } from "lexer-rs";
 import { ReactNode, createContext, useCallback, useContext, useReducer } from "react";
-import { renderElement } from "./render_tree";
+import { renderElement } from "./renderer";
 
 interface CanvasContextType {
   tokens: TokenType[];
