@@ -15,6 +15,7 @@ function gridify(tokens: TokenType[]): Grid {
   const grid: Grid = { rows: [] };
   let indent = 0;
   let index = 0;
+  // let previous: TokenType | null = null;
 
   // Make sure tokens end on EOF - log error on fire to flag needed fix
   if (tokens.length > 0 && tokens[tokens.length - 1].kind !== "Eof") {
@@ -23,28 +24,34 @@ function gridify(tokens: TokenType[]): Grid {
   }
 
   let children: JSX.Element[] = [];
-  for (const token of tokens) {
+  for (const [idx, token] of tokens.entries()) {
     if (token.kind === "Dedent") continue; // todo: handle indents
-    if (token.kind === "Newline" || token.kind === "Eof") {
+    if (token.kind === "Eof") {
       grid.rows.push({
         index,
         indent,
-        elements: <div>{children}</div>,
+        elements: <div key={index}>{children}</div>,
       });
-      index += 1;
+    } else if (token.kind === "Newline") {
       grid.rows.push({
         index,
         indent,
-        elements: <div>{renderElement(token)}</div>,
+        elements: <div key={index}>{children}</div>,
       });
       index += 1;
+      if (idx - 1 > 0 && tokens[idx - 1].kind === "Newline") {
+        grid.rows.push({
+          index,
+          indent,
+          elements: <div>{renderElement(token)}</div>,
+        });
+        index += 1;
+      }
       children = [];
     } else {
       children.push(renderElement(token));
     }
   }
-
-  console.log("grid: ", grid);
 
   return grid;
 }
