@@ -1,11 +1,12 @@
 import { TokenType, LexerWrapper } from "lexer-rs";
 import { ReactNode, createContext, useCallback, useContext, useReducer } from "react";
 import { renderElement } from "./renderer";
+import { Grid, gridify } from "./canvas_grid";
 
 interface CanvasContextType {
   tokens: TokenType[];
   lexer: LexerWrapper;
-  tree: JSX.Element[];
+  grid: Grid;
 }
 type CanvasActionType = { type: "SET"; payload: string };
 type UseCanvasManagerResult = ReturnType<typeof useCanvasManager>;
@@ -25,12 +26,12 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
     switch (action.type) {
       case "SET": {
         const tokens = state.lexer.tokenize(action.payload);
-        const tree = tokens.map((t: TokenType) => renderElement(t));
-        console.log("new tree", tree);
+        // const tree = tokens.map((t: TokenType) => renderElement(t));
+        const grid = gridify(tokens);
         return {
           ...state,
           tokens,
-          tree,
+          grid,
         };
       }
       default:

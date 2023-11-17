@@ -27,7 +27,7 @@ export function renderElement(token: TokenType) {
       return <span />;
     case 186:
       return <span className={className}>{token.value}</span>;
-    case 187:
+    case 187 /** newline */:
       return <br />;
     default:
       // @ts-ignore

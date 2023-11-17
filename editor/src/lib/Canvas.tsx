@@ -100,13 +100,14 @@ function Canvas() {
 }
 
 function Elements() {
-  const tree = useCanvasContext().tree;
+  const grid = useCanvasContext().grid;
+  return <div>{grid.rows.map((row) => row.elements)}</div>;
 
   return (
     <>
-      {tree.map((e, idx) => (
+      {/* {tree.map((e, idx) => (
         <div key={idx}>{e}</div>
-      ))}
+      ))} */}
     </>
   );
 }
@@ -121,7 +122,7 @@ function EditorWrapper() {
 
 export function TextEditor() {
   return (
-    <CanvasProvider initialContext={{ lexer: new LexerWrapper(), tokens: [], tree: [] }}>
+    <CanvasProvider initialContext={{ lexer: new LexerWrapper(), tokens: [], grid: { rows: [] } }}>
       <EditorWrapper />
     </CanvasProvider>
   );
