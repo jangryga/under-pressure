@@ -5,7 +5,7 @@ import {
   useRenderElement,
   useUpdateContext,
 } from "./canvas_context";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const context: {
   savedSelection: {
@@ -68,28 +68,21 @@ function restoreSelection(containerEl: HTMLDivElement, savedSel: any) {
 }
 
 function Canvas() {
-  const context = useCanvasContext();
+  // const context = useCanvasContext();
   const updateContext = useUpdateContext();
   const ref = useRef<HTMLDivElement>(null);
-  const render = useRenderElement();
-  const [ts, setTs] = useState<JSX.Element[]>([]);
 
-  // useEffect(() => {
-  //   // console.log(Array.from(ref.current?.innerText ?? "").map((t) => t.charCodeAt(0)));
-  //   // ref.current!.innerHTML = context.tree!;
-  //   // restoreSelection(ref.current!, context.savedSelection);
-  //   const _tokens = context.tokens.map((t) => render(t));
-  //   setTs(_tokens);
-  // }, [context.tokens]);
+  useEffect(() => {
+    ref.current?.focus();
+  }, []);
 
   return (
     <div>
       <Elements />
-      <div>{JSON.stringify(context.tokens)}</div>
       <div
         ref={ref}
         contentEditable
-        className="w-full h-full focus:outline-none pl-4"
+        className="w-full h-full focus:outline-none"
         onInput={(_) => {
           saveSelection(ref.current!);
           updateContext(ref.current!.innerText);

@@ -184,7 +184,8 @@ const tokenTable = ["    ", "", "False",
   ">>",
   "EOF",
   "ident",
-  "newline"
+  "newline",
+  "whitespace"
 ]
 
 export function tokenLookup(index: number): string {

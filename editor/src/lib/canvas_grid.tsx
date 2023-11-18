@@ -49,6 +49,14 @@ function gridify(tokens: TokenType[]): Grid {
       }
       children = [];
     } else {
+      if (token.kind === "Indent" || token.kind === "Dedent") {
+        indent +=
+          token.kind === "Indent" ? Number.parseInt(token.value!) : -Number.parseInt(token.value!);
+        children.push(
+          renderElement({ kind: "Whitespace", value: indent.toString(), category: "Whitespace" }),
+        );
+        continue;
+      }
       children.push(renderElement(token));
     }
   }

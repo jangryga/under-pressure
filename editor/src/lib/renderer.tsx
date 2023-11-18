@@ -29,6 +29,8 @@ export function renderElement(token: TokenType) {
       return <span className={className}>{token.value}</span>;
     case 187 /** newline */:
       return <br />;
+    case 188 /** whitespace */:
+      return <span>{"\u00A0".repeat(Number.parseInt(token.value!))}</span>;
     default:
       // @ts-ignore
       return <span className={className}>{tokenLookup(TokenKind[token.kind])}</span>;
