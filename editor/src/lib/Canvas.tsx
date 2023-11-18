@@ -1,13 +1,9 @@
-import { LexerWrapper, TokenCategory, TokenKind } from "lexer-rs";
-import {
-  CanvasProvider,
-  useCanvasContext,
-  useRenderElement,
-  useUpdateContext,
-} from "./canvas_context";
-import { useEffect, useRef, useState } from "react";
+import { LexerWrapper } from "lexer-rs";
+import { CanvasProvider, useCanvasContext, useUpdateContext } from "./canvas_context";
+import { useEffect, useRef } from "react";
+import ReactDOMServer from "react-dom/server";
 
-const context: {
+const context2: {
   savedSelection: {
     start: number;
     end: number;
@@ -28,7 +24,7 @@ function saveSelection(containerEl: HTMLDivElement) {
   preSelectionRange!.setEnd(range!.startContainer, range!.startOffset);
   const start = preSelectionRange!.toString().length;
 
-  context.savedSelection = { start: start, end: start + range!.toString().length };
+  context2.savedSelection = { start: start, end: start + range!.toString().length };
 }
 
 function restoreSelection(containerEl: HTMLDivElement, savedSel: any) {
@@ -43,7 +39,7 @@ function restoreSelection(containerEl: HTMLDivElement, savedSel: any) {
 
   while (!stop && (node = nodeStack.pop())) {
     if (node.nodeType === Node.TEXT_NODE) {
-      const textNode = node as Text; // TypeScript type assertion
+      const textNode = node as Text;
       const nextCharIndex = charIndex + textNode.length;
       if (!foundStart && savedSel.start >= charIndex && savedSel.start <= nextCharIndex) {
         range.setStart(textNode, savedSel.start - charIndex);
@@ -68,7 +64,7 @@ function restoreSelection(containerEl: HTMLDivElement, savedSel: any) {
 }
 
 function Canvas() {
-  // const context = useCanvasContext();
+  const context = useCanvasContext();
   const updateContext = useUpdateContext();
   const ref = useRef<HTMLDivElement>(null);
 
@@ -76,12 +72,19 @@ function Canvas() {
     ref.current?.focus();
   }, []);
 
+  useEffect(() => {
+    ref.current!.innerHTML = ReactDOMServer.renderToString(
+      <>{context.grid.rows.map((row) => row.elements)}</>,
+    );
+    restoreSelection(ref.current!, context2.savedSelection);
+  }, [context.grid]);
+
   return (
     <div>
-      <Elements />
       <div
         ref={ref}
         contentEditable
+        suppressContentEditableWarning
         className="w-full h-full focus:outline-none"
         onInput={(_) => {
           saveSelection(ref.current!);
@@ -89,19 +92,6 @@ function Canvas() {
         }}
       />
     </div>
-  );
-}
-
-function Elements() {
-  const grid = useCanvasContext().grid;
-  return <div>{grid.rows.map((row) => row.elements)}</div>;
-
-  return (
-    <>
-      {/* {tree.map((e, idx) => (
-        <div key={idx}>{e}</div>
-      ))} */}
-    </>
   );
 }
 
