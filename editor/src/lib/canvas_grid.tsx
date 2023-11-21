@@ -30,23 +30,24 @@ function gridify(tokens: TokenType[]): Grid {
       grid.rows.push({
         index,
         indent,
-        elements: <div key={index}>{children}</div>,
+        elements: <div key={index}>{children.length === 0 ? [<br />] : children}</div>,
       });
     } else if (token.kind === "Newline") {
+      const els = children.length === 0 ? [<br />] : children;
       grid.rows.push({
         index,
         indent,
-        elements: <div key={index}>{children}</div>,
+        elements: <div key={index}>{els}</div>,
       });
       index += 1;
-      if (idx - 1 > 0 && tokens[idx - 1].kind === "Newline") {
-        grid.rows.push({
-          index,
-          indent,
-          elements: <div>{renderElement(token, `${index}-${children.length}`)}</div>,
-        });
-        index += 1;
-      }
+      // if (idx - 1 > 0 && tokens[idx - 1].kind === "Newline") {
+      //   grid.rows.push({
+      //     index,
+      //     indent,
+      //     elements: <div>{renderElement(token, `${index}-${children.length}`)}</div>,
+      //   });
+      //   index += 1;
+      // }
       children = [];
     } else {
       if (token.kind === "Indent" || token.kind === "Dedent") {

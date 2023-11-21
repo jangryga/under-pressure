@@ -2145,10 +2145,10 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-lexer-rs@^0.1.29:
-  version "0.1.29"
-  resolved "https://registry.yarnpkg.com/lexer-rs/-/lexer-rs-0.1.29.tgz#896c20731b8324fdb75c2576e0609fedc577f0b2"
-  integrity sha512-rb40nU0/Wko0XXTiwIKwMmQ0L2XNinOkTns+K6Mj5/587anlKcJglmeXKX+w3c8E4+hzoQnzkq6C+k15YywFQQ==
+lexer-rs@0.1.31:
+  version "0.1.31"
+  resolved "https://registry.yarnpkg.com/lexer-rs/-/lexer-rs-0.1.31.tgz#918e96580c12f39ce282d636a01b8c2edc3e01c1"
+  integrity sha512-WNYuSx16az+Ecw48KE9n6DofsGQd7t1iQEY14mILAinOqHR2r9yiM7kv3+5izHIwQE2S9usnub6C42b2RWHOAQ==
 
 lilconfig@^2.0.5, lilconfig@^2.1.0:
   version "2.1.0"

@@ -22,8 +22,12 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
   const [context, dispatch] = useReducer((state: CanvasContextType, action: CanvasActionType) => {
     switch (action.type) {
       case "SET": {
+        console.log(
+          "in: ",
+          Array.from(action.payload).map((e) => e.charCodeAt(0)),
+        );
         const tokens = state.lexer.tokenize(action.payload);
-        console.log(tokens);
+        console.log("out: ", tokens);
         // const tree = tokens.map((t: TokenType) => renderElement(t));
         const grid = gridify(tokens);
         return {
