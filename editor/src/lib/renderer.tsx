@@ -15,7 +15,7 @@ const style = [
   "text-black",
 ];
 
-export function renderElement(token: TokenType) {
+export function renderElement(token: TokenType, key: string) {
   const className = style[TokenCategory[token.category as any] as any];
   // @ts-ignore
   switch (TokenKind[token.kind]) {
@@ -24,15 +24,22 @@ export function renderElement(token: TokenType) {
       return <span />;
     }
     case 185:
-      return <span />;
+      return <span key={key} />;
     case 186:
-      return <span className={className}>{token.value}</span>;
+      return (
+        <span className={className} key={key}>
+          {token.value}
+        </span>
+      );
     case 187 /** newline */:
       return <br />;
     case 188 /** whitespace */:
-      return <span>{"\u00A0".repeat(Number.parseInt(token.value!))}</span>;
+      return <span key={key}>{"\u00A0".repeat(Number.parseInt(token.value!))}</span>;
     default:
-      // @ts-ignore
-      return <span className={className}>{tokenLookup(TokenKind[token.kind])}</span>;
+      return (
+        <span className={className} key={key}>
+          {tokenLookup(TokenKind[token.kind as any] as any)}
+        </span>
+      );
   }
 }

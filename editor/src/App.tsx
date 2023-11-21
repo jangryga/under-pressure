@@ -4,7 +4,7 @@ import { TextEditor } from "./lib/Canvas";
 export default function App() {
   return (
     <Container>
-      <TextEditor />
+      <TextEditor config={{ debugMode: true }} />
     </Container>
   );
 }

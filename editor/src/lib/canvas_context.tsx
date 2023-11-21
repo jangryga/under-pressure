@@ -1,6 +1,5 @@
 import { TokenType, LexerWrapper } from "lexer-rs";
 import { ReactNode, createContext, useCallback, useContext, useReducer } from "react";
-import { renderElement } from "./renderer";
 import { Grid, gridify } from "./canvas_grid";
 
 interface CanvasContextType {
@@ -14,18 +13,17 @@ type UseCanvasManagerResult = ReturnType<typeof useCanvasManager>;
 const CanvasContext = createContext<UseCanvasManagerResult>({
   context: null as any,
   updateTree: (_: string) => {},
-  _renderElement: (_: TokenType) => <div />,
 });
 
 function useCanvasManager(initialCanvasContext: CanvasContextType): {
   context: CanvasContextType;
   updateTree: (text: string) => void;
-  _renderElement: (token: TokenType) => JSX.Element;
 } {
   const [context, dispatch] = useReducer((state: CanvasContextType, action: CanvasActionType) => {
     switch (action.type) {
       case "SET": {
         const tokens = state.lexer.tokenize(action.payload);
+        console.log(tokens);
         // const tree = tokens.map((t: TokenType) => renderElement(t));
         const grid = gridify(tokens);
         return {
@@ -43,9 +41,7 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
     dispatch({ type: "SET", payload: text });
   }, []);
 
-  const _renderElement = useCallback(renderElement, []);
-
-  return { context, updateTree, _renderElement };
+  return { context, updateTree };
 }
 
 export const CanvasProvider = ({
@@ -68,9 +64,4 @@ export const useUpdateContext = (): UseCanvasManagerResult["updateTree"] => {
 export const useCanvasContext = (): UseCanvasManagerResult["context"] => {
   const { context } = useContext(CanvasContext);
   return context;
-};
-
-export const useRenderElement = (): UseCanvasManagerResult["_renderElement"] => {
-  const { _renderElement } = useContext(CanvasContext);
-  return _renderElement;
 };

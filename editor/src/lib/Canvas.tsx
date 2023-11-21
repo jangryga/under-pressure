@@ -3,18 +3,16 @@ import { CanvasProvider, useCanvasContext, useUpdateContext } from "./canvas_con
 import { useEffect, useRef } from "react";
 import ReactDOMServer from "react-dom/server";
 
-const context2: {
+const selectionContext: {
   savedSelection: {
     start: number;
     end: number;
   };
-  parsedContent: any;
 } = {
   savedSelection: {
     start: 0,
     end: 0,
   },
-  parsedContent: "",
 };
 
 function saveSelection(containerEl: HTMLDivElement) {
@@ -24,7 +22,7 @@ function saveSelection(containerEl: HTMLDivElement) {
   preSelectionRange!.setEnd(range!.startContainer, range!.startOffset);
   const start = preSelectionRange!.toString().length;
 
-  context2.savedSelection = { start: start, end: start + range!.toString().length };
+  selectionContext.savedSelection = { start: start, end: start + range!.toString().length };
 }
 
 function restoreSelection(containerEl: HTMLDivElement, savedSel: any) {
@@ -76,7 +74,7 @@ function Canvas() {
     ref.current!.innerHTML = ReactDOMServer.renderToString(
       <>{context.grid.rows.map((row) => row.elements)}</>,
     );
-    restoreSelection(ref.current!, context2.savedSelection);
+    restoreSelection(ref.current!, selectionContext.savedSelection);
   }, [context.grid]);
 
   return (
@@ -95,18 +93,51 @@ function Canvas() {
   );
 }
 
-function EditorWrapper() {
+function DebugPanel() {
+  const context = useCanvasContext();
+  const tokens = context.tokens;
+  const gridRows = context.grid.rows;
+
   return (
-    <div className="w-full md:w-[700px] lg:w-[1000px] bg-primary-900 h-[600px] border border-[#383838]">
-      <Canvas />
-    </div>
+    <>
+      <h4>Debug view</h4>
+      <div className="grid grid-cols-2 border border-gray-400 mb-2 h-[200px]">
+        <ul className="border-r border-gray-400 col-span-1 overflow-y-auto ">
+          {tokens.map((token, idx) => (
+            <li key={idx}>{token.kind}</li>
+          ))}
+        </ul>
+        <ul className="col-span-1 overflow-y-auto">
+          {gridRows.map((row, idx) => (
+            <li key={idx} className="border border-red-900 mb-1">
+              {row.elements}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
   );
 }
 
-export function TextEditor() {
+function EditorWrapper({ debugMode }: EditorConfig) {
+  return (
+    <>
+      {debugMode && <DebugPanel />}
+      <div className="w-full md:w-[700px] lg:w-[1000px] bg-primary-900 h-[600px] border border-[#383838]">
+        <Canvas />
+      </div>
+    </>
+  );
+}
+
+export function TextEditor(props: { config: EditorConfig }) {
   return (
     <CanvasProvider initialContext={{ lexer: new LexerWrapper(), tokens: [], grid: { rows: [] } }}>
-      <EditorWrapper />
+      <EditorWrapper {...props.config} />
     </CanvasProvider>
   );
+}
+
+interface EditorConfig {
+  debugMode: boolean;
 }

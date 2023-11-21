@@ -43,7 +43,7 @@ function gridify(tokens: TokenType[]): Grid {
         grid.rows.push({
           index,
           indent,
-          elements: <div>{renderElement(token)}</div>,
+          elements: <div>{renderElement(token, `${index}-${children.length}`)}</div>,
         });
         index += 1;
       }
@@ -53,11 +53,14 @@ function gridify(tokens: TokenType[]): Grid {
         indent +=
           token.kind === "Indent" ? Number.parseInt(token.value!) : -Number.parseInt(token.value!);
         children.push(
-          renderElement({ kind: "Whitespace", value: indent.toString(), category: "Whitespace" }),
+          renderElement(
+            { kind: "Whitespace", value: indent.toString(), category: "Whitespace" },
+            `${index}-${children.length}`,
+          ),
         );
         continue;
       }
-      children.push(renderElement(token));
+      children.push(renderElement(token, `${index}-${children.length}`));
     }
   }
 
