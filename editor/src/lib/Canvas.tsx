@@ -7,7 +7,7 @@ import {
 } from "./canvas_context";
 import { useEffect, useRef } from "react";
 import ReactDOMServer from "react-dom/server";
-import { saveSelectionInternal, restoreSelection } from "./selection";
+import { restoreSelection } from "./selection";
 
 function Canvas() {
   const context = useEditorContext();
@@ -34,6 +34,7 @@ function Canvas() {
         suppressContentEditableWarning
         className="w-full h-full focus:outline-none"
         onInput={(_) => {
+          saveSelection(ref.current!);
           updateState(ref.current!.innerText);
         }}
       />
@@ -49,8 +50,8 @@ function DebugPanel() {
   return (
     <>
       <h4>Debug view</h4>
-      <div className="grid grid-cols-2 border border-gray-400 mb-2 h-[200px]">
-        <ul className="border-r border-gray-400 col-span-1 overflow-y-auto ">
+      <div className="grid grid-cols-2 border border-[#383838] mb-2 h-[200px]">
+        <ul className="border-r border-[#383838] col-span-1 overflow-y-auto ">
           {tokens.map((token, idx) => (
             <li key={idx}>{token.kind}</li>
           ))}
@@ -70,8 +71,22 @@ function DebugPanel() {
 function EditorWrapper({ debugMode }: EditorConfig) {
   return (
     <>
-      {debugMode && <DebugPanel />}
-      <div className="w-full md:w-[700px] lg:w-[1000px] bg-primary-900 h-[600px] border border-[#383838]">
+      {debugMode && (
+        <>
+          <DebugPanel />
+          <div className="flex gap-2">
+            <button
+              className="bg-[#2f23d1] rounded-sm text-white px-2 py-1 mb-3"
+              onClick={() => {
+                const range = document.getSelection()?.getRangeAt(0);
+                console.log(range);
+              }}>
+              Current Range
+            </button>
+          </div>
+        </>
+      )}
+      <div className="w-full md:w-[700px] lg:w-[1080px] bg-primary-900 h-[600px] border border-[#383838]">
         <Canvas />
       </div>
     </>
