@@ -30,7 +30,10 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
   const [context, dispatch] = useReducer((state: CanvasContextType, action: CanvasActionType) => {
     switch (action.type) {
       case "SAVE_SELECTION": {
-        const oldSelection = saveSelectionInternal(action.payload.element);
+        const whitespaces = state.tokens.filter((t) => t.kind === "Newline").length;
+        console.log("found whitespaces: ", whitespaces);
+        const oldSelection = saveSelectionInternal(action.payload.element, whitespaces);
+        console.log("selection: ", oldSelection);
         return {
           ...state,
           selection: oldSelection,

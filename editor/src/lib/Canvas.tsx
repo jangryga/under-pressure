@@ -24,6 +24,8 @@ function Canvas() {
       <>{context.grid.rows.map((row) => row.elements)}</>,
     );
     restoreSelection(ref.current!, context.selection);
+    const range = document.getSelection()?.getRangeAt(0);
+    console.log(range);
   }, [context.grid]);
 
   return (
@@ -79,7 +81,7 @@ function EditorWrapper({ debugMode }: EditorConfig) {
               className="bg-[#2f23d1] rounded-sm text-white px-2 py-1 mb-3"
               onClick={() => {
                 const range = document.getSelection()?.getRangeAt(0);
-                console.log(range);
+                // console.log(range);
               }}>
               Current Range
             </button>

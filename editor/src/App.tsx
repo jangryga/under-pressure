@@ -37,18 +37,34 @@ export default function App() {
                 const range = new Range();
                 range.setStart(ref.current!, 1);
                 range.setEnd(ref.current!, 2);
-                range.collapse(true);
+                // range.collapse(true);
                 const selection = document.getSelection();
                 selection?.removeAllRanges();
                 selection?.addRange(range);
               }}>
               Set Range
             </button>
+            <button
+              className="bg-[#2f23d1] rounded-sm text-white px-2 py-1 mb-3"
+              onClick={() => {
+                const range = document.getSelection()?.getRangeAt(0);
+                console.log(range);
+              }}>
+              Current Range
+            </button>
           </ButtonMenu>
           <div
             ref={ref}
             className="w-[700px] focus:outline-none h-[400px] border border-gray-600"
             contentEditable
+            onSelect={() => {
+              // console.log("selection changed");
+            }}
+            onInput={() => {
+              const range = document.getSelection()?.getRangeAt(0);
+              // console.log(range);
+              // ref.current!.
+            }}
           />
         </>
       ) : (
