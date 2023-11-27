@@ -25,7 +25,6 @@ function Canvas() {
     );
     restoreSelection(ref.current!, context.selection);
     const range = document.getSelection()?.getRangeAt(0);
-    console.log(range);
   }, [context.grid]);
 
   return (
@@ -35,6 +34,12 @@ function Canvas() {
         contentEditable
         suppressContentEditableWarning
         className="w-full h-full focus:outline-none"
+        onSelect={() => {
+          const selection = document.getSelection();
+          console.log("selection ", selection);
+          console.log("range ", selection?.getRangeAt(0).commonAncestorContainer);
+          saveSelection(ref.current!);
+        }}
         onInput={(_) => {
           saveSelection(ref.current!);
           updateState(ref.current!.innerText);
@@ -81,7 +86,6 @@ function EditorWrapper({ debugMode }: EditorConfig) {
               className="bg-[#2f23d1] rounded-sm text-white px-2 py-1 mb-3"
               onClick={() => {
                 const range = document.getSelection()?.getRangeAt(0);
-                // console.log(range);
               }}>
               Current Range
             </button>

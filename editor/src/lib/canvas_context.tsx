@@ -18,22 +18,18 @@ const CanvasContext = createContext<UseCanvasManagerResult>({
   context: null as any,
   updateTree: (_: string) => {},
   saveSelection: () => {},
-  // restoreSelection: () => {},
 });
 
 function useCanvasManager(initialCanvasContext: CanvasContextType): {
   context: CanvasContextType;
   updateTree: (text: string) => void;
   saveSelection: (element: HTMLDivElement) => void;
-  // restoreSelection: () => void;
 } {
   const [context, dispatch] = useReducer((state: CanvasContextType, action: CanvasActionType) => {
     switch (action.type) {
       case "SAVE_SELECTION": {
         const whitespaces = state.tokens.filter((t) => t.kind === "Newline").length;
-        console.log("found whitespaces: ", whitespaces);
-        const oldSelection = saveSelectionInternal(action.payload.element, whitespaces);
-        console.log("selection: ", oldSelection);
+        const oldSelection = saveSelectionInternal(action.payload.element);
         return {
           ...state,
           selection: oldSelection,

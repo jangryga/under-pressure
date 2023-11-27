@@ -4,15 +4,11 @@ import { useRef, useEffect, useState } from "react";
 
 export default function App() {
   const ref = useRef<HTMLDivElement>(null);
-  const [selection, setSelection] = useState<any>();
-  const [view, setView] = useState<number>(0);
+  const [view, setView] = useState<number>(1);
   useEffect(() => {
     ref.current?.focus();
   }, []);
 
-  useEffect(() => {
-    console.log(selection);
-  }, [selection?.anchorNode]);
   return (
     <Container>
       <button
@@ -43,14 +39,6 @@ export default function App() {
                 selection?.addRange(range);
               }}>
               Set Range
-            </button>
-            <button
-              className="bg-[#2f23d1] rounded-sm text-white px-2 py-1 mb-3"
-              onClick={() => {
-                const range = document.getSelection()?.getRangeAt(0);
-                console.log(range);
-              }}>
-              Current Range
             </button>
           </ButtonMenu>
           <div

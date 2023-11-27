@@ -1,6 +1,8 @@
 export interface BasicSelection {
   start: number;
   end: number;
+  collapsed: boolean;
+  reversed?: boolean;
 }
 
 export interface FancierSelection {
@@ -10,29 +12,33 @@ export interface FancierSelection {
   endNodeOffset: number;
 }
 
-export function fancierSaveSelectionInternal(containerEl: HTMLDivElement): FancierSelection {
-  const range = document.getSelection()?.getRangeAt(0);
-}
-
 /**
  * @param containerEl element at the start of reconciliation range. This should be the node where the changes started
  * (important note for future caching).
  */
-export function saveSelectionInternal(
-  containerEl: HTMLDivElement,
-  whitespaceCount: number,
-): BasicSelection {
-  const range = window.getSelection()?.getRangeAt(0);
+export function saveSelectionInternal(containerEl: HTMLDivElement): BasicSelection | null {
+  const selection = window.getSelection();
+  if (!selection) {
+    return null;
+  }
+  const range = selection.getRangeAt(0);
+  const collapsed = selection.isCollapsed;
+
   const prevRange = new Range();
   prevRange.selectNodeContents(containerEl);
-  // const preSelectionRange = range?.cloneRange();
-  // console.log("before: ", preSelectionRange);
-  // preSelectionRange?.selectNodeContents(containerEl);
-  // console.log("after: ", preSelectionRange);
-  // const start = preSelectionRange!.toString().length;
   const start = prevRange!.toString().length;
+  if (collapsed) {
+    return {
+      start,
+      end: start,
+      collapsed,
+      reversed: false,
+    };
+  } else {
+    console.warn("unstable non-collapsed range, might be incorrect");
+  }
 
-  return { start: start, end: start + range!.toString().length + whitespaceCount };
+  return { start: start, end: start + range!.toString().length, collapsed };
 }
 
 export function restoreSelection(containerEl: HTMLDivElement, savedSel: BasicSelection) {
