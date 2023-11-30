@@ -5,13 +5,8 @@ export interface BasicSelection {
   reversed?: boolean;
 }
 
-export interface FancierSelection {
-  startNode: Element;
-  startNodeOffset: number;
-  endNode: Element;
-  endNodeOffset: number;
-}
-
+//   context2.savedSelection = { start: start, end: start + range!.toString().length };
+// }
 /**
  * @param containerEl element at the start of reconciliation range. This should be the node where the changes started
  * (important note for future caching).
@@ -26,6 +21,7 @@ export function saveSelectionInternal(containerEl: HTMLDivElement): BasicSelecti
 
   const prevRange = new Range();
   prevRange.selectNodeContents(containerEl);
+  prevRange.setEnd(range!.startContainer, range!.startOffset);
   const start = prevRange!.toString().length;
   if (collapsed) {
     return {

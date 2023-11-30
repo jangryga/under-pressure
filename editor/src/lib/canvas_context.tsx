@@ -7,7 +7,7 @@ interface CanvasContextType {
   tokens: TokenType[];
   lexer: LexerWrapper;
   grid: Grid;
-  selection: BasicSelection;
+  selection: BasicSelection | null;
 }
 type CanvasActionType =
   | { type: "SET"; payload: string }
@@ -30,6 +30,7 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
       case "SAVE_SELECTION": {
         const whitespaces = state.tokens.filter((t) => t.kind === "Newline").length;
         const oldSelection = saveSelectionInternal(action.payload.element);
+        console.log(oldSelection);
         return {
           ...state,
           selection: oldSelection,
