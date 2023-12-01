@@ -1,78 +1,87 @@
-export interface BasicSelection {
-  start: number;
-  end: number;
-  collapsed: boolean;
-  reversed?: boolean;
-}
-
-//   context2.savedSelection = { start: start, end: start + range!.toString().length };
-// }
-/**
- * @param containerEl element at the start of reconciliation range. This should be the node where the changes started
- * (important note for future caching).
- */
-export function saveSelectionInternal(containerEl: HTMLDivElement): BasicSelection | null {
-  const selection = window.getSelection();
-  if (!selection) {
-    return null;
-  }
-  const range = selection.getRangeAt(0);
-  const collapsed = selection.isCollapsed;
-
-  const prevRange = new Range();
-  prevRange.selectNodeContents(containerEl);
-  prevRange.setEnd(range!.startContainer, range!.startOffset);
-  const start = prevRange!.toString().length;
-  if (collapsed) {
-    return {
-      start,
-      end: start,
-      collapsed,
-      reversed: false,
-    };
-  } else {
-    console.warn("unstable non-collapsed range, might be incorrect");
-  }
-
-  return { start: start, end: start + range!.toString().length, collapsed };
-}
-
-export function restoreSelection(containerEl: HTMLDivElement, savedSel: BasicSelection) {
-  let charIndex = 0;
-  let range = document.createRange();
-  range.setStart(containerEl, 0);
-  range.collapse(true);
-  let nodeStack: Node[] = [containerEl];
-  let node: Node | undefined;
-  let foundStart = false;
-  let stop = false;
-
-  while (!stop && (node = nodeStack.pop())) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const textNode = node as Text;
-      const nextCharIndex = charIndex + textNode.length;
-      // todo: on node level, should we have this comparison based on the max depth (max selection length)? or does the selection start change when we do setStartAfter() ?
-      if (!foundStart && savedSel.start >= charIndex && savedSel.start <= nextCharIndex) {
-        range.setStart(textNode, savedSel.start - charIndex);
-        foundStart = true;
+class SelectionNode {
+  public name: string;
+  public children: SelectionNode[] | undefined;
+  public value: string | undefined;
+  public rangeInfo:
+    | {
+        rangeStart?: boolean;
+        rangeStartOffset?: number;
+        rangeEnd?: boolean;
+        rangeEndOffset?: number;
       }
-      if (foundStart && savedSel.end >= charIndex && savedSel.end <= nextCharIndex) {
-        range.setEnd(textNode, savedSel.end - charIndex);
-        stop = true;
+    | undefined;
+
+  constructor(node: Node, domRange: Range) {
+    if (domRange.startContainer === node) {
+      this.rangeInfo = {
+        ...this.rangeInfo,
+        rangeStart: true,
+        rangeStartOffset: domRange.startOffset,
+      };
+    }
+    if (domRange.endContainer === node) {
+      this.rangeInfo = {
+        ...this.rangeInfo,
+        rangeEnd: true,
+        rangeEndOffset: domRange.endOffset,
+      };
+    }
+
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const element = node as Element;
+      switch (element.tagName) {
+        case "DIV":
+          this.name = "DIV";
+          break;
+        case "BR":
+          this.name = "BR";
+          break;
+        case "SPAN":
+          this.name = "SPAN";
+          break;
+        default:
+          throw Error(`Unsupported element ${element.tagName}`);
       }
-      charIndex = nextCharIndex;
-    } else if (node.nodeName === "BR") {
-      range.setStartAfter(node);
-      range.setEndAfter(node);
+    } else if (node.nodeType === Node.TEXT_NODE) {
+      const element = node as Text;
+      this.name = "TEXT";
+      this.value = element.textContent!;
     } else {
-      let i = node.childNodes.length;
-      while (i--) {
-        nodeStack.push(node.childNodes[i]);
+      throw Error(`Unsupported node type ${node.nodeType}`);
+    }
+
+    if (node.childNodes) {
+      this.children = [];
+      if (!this.rangeInfo?.rangeEnd) {
+        for (const ch of node.childNodes) {
+          const chn = new SelectionNode(ch, domRange);
+          this.children.push(chn);
+          if (chn.containsEnd()) break;
+        }
       }
     }
   }
 
-  const sel = window.getSelection();
-  sel!.removeAllRanges();
-  sel!.addRange(range);
+  containsEnd() {
+    if (this.rangeInfo?.rangeEnd) return true;
+    if (this.children) {
+      for (const child of this.children) {
+        if (child.containsEnd()) return true;
+      }
+    }
+    return false;
+  }
 }
+
+function saveSelection(element: HTMLElement) {
+  const selection = document.getSelection();
+  if (!selection) return null;
+  const range = selection.getRangeAt(0);
+
+  const canvasNode = new SelectionNode(element, range);
+  console.log(canvasNode);
+}
+
+function restoreSelection() {}
+
+export { saveSelection };

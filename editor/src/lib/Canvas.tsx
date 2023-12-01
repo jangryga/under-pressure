@@ -7,12 +7,12 @@ import {
 } from "./canvas_context";
 import { useEffect, useRef } from "react";
 import ReactDOMServer from "react-dom/server";
-import { restoreSelection } from "./selection";
+import { saveSelection } from "./selection";
 
 function Canvas() {
   const context = useEditorContext();
   const updateState = useUpdateUpdateEditorState();
-  const saveSelection = useSaveEditorSelection();
+  // const saveSelection = useSaveEditorSelection();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,7 +34,6 @@ function Canvas() {
         suppressContentEditableWarning
         className="w-full h-full focus:outline-none"
         onSelect={() => {
-          const selection = document.getSelection();
           saveSelection(ref.current!);
         }}
         onInput={(_) => {

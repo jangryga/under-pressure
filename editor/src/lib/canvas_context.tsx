@@ -1,8 +1,40 @@
 import { TokenType, LexerWrapper } from "lexer-rs";
 import { ReactNode, createContext, useCallback, useContext, useReducer } from "react";
 import { Grid, gridify } from "./canvas_grid";
-import { type BasicSelection, saveSelectionInternal } from "./selection";
 
+// old
+export interface BasicSelection {
+  start: number;
+  end: number;
+  collapsed: boolean;
+  reversed?: boolean;
+}
+
+export function saveSelectionInternal(containerEl: HTMLDivElement): BasicSelection | null {
+  const selection = window.getSelection();
+  if (!selection) {
+    return null;
+  }
+  const range = selection.getRangeAt(0);
+  const collapsed = selection.isCollapsed;
+
+  const prevRange = new Range();
+  prevRange.selectNodeContents(containerEl);
+  prevRange.setEnd(range!.startContainer, range!.startOffset);
+  const start = prevRange!.toString().length;
+  if (collapsed) {
+    return {
+      start,
+      end: start,
+      collapsed,
+      reversed: false,
+    };
+  } else {
+    console.warn("unstable non-collapsed range, might be incorrect");
+  }
+
+  return { start: start, end: start + range!.toString().length, collapsed };
+}
 interface CanvasContextType {
   tokens: TokenType[];
   lexer: LexerWrapper;
@@ -30,7 +62,6 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
       case "SAVE_SELECTION": {
         const whitespaces = state.tokens.filter((t) => t.kind === "Newline").length;
         const oldSelection = saveSelectionInternal(action.payload.element);
-        console.log(oldSelection);
         return {
           ...state,
           selection: oldSelection,

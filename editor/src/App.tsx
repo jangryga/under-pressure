@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { TextEditor } from "./lib/Canvas";
 import { useRef, useEffect, useState } from "react";
-import { saveSelectionInternal } from "./lib/selection";
+import { saveSelection } from "./lib/selection";
 
 export default function App() {
   const ref = useRef<HTMLDivElement>(null);
@@ -46,11 +46,6 @@ export default function App() {
             ref={ref}
             className="w-[700px] focus:outline-none h-[400px] border border-gray-600"
             contentEditable
-            onSelect={() => {
-              // console.log(saveSelectionInternal(ref.current!));
-              const sel = document.getSelection();
-              console.log(sel);
-            }}
             onInput={() => {
               const range = document.getSelection()?.getRangeAt(0);
               // console.log(range);
