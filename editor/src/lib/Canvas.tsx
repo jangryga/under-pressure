@@ -1,19 +1,18 @@
-import { LexerWrapper, TokenKind, TokenType } from "lexer-rs";
+import { LexerWrapper, TokenType } from "lexer-rs";
 import {
   CanvasProvider,
   useEditorContext,
   useUpdateUpdateEditorState,
   useSaveEditorSelection,
-  restoreSelection,
 } from "./canvas_context";
 import { useEffect, useRef } from "react";
 import ReactDOMServer from "react-dom/server";
-import { saveSelection, restoreSelection as rS } from "./selection";
+import { restoreSelection } from "./selection";
 
 function Canvas() {
   const context = useEditorContext();
-  const updateState = useUpdateUpdateEditorState();
-  // const saveSelection = useSaveEditorSelection();
+  const updateEditorState = useUpdateUpdateEditorState();
+  const saveSelection = useSaveEditorSelection();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,7 +23,7 @@ function Canvas() {
     ref.current!.innerHTML = ReactDOMServer.renderToString(
       <>{context.grid.rows.map((row) => row.elements)}</>,
     );
-    restoreSelection(ref.current!, context.selection!);
+    restoreSelection(ref.current!, context.selection);
   }, [context.grid]);
 
   return (
@@ -38,12 +37,8 @@ function Canvas() {
           saveSelection(ref.current!);
         }}
         onInput={() => {
-          const sel = saveSelection(ref.current!);
-          if (!sel) {
-            console.log("no selection");
-            return;
-          }
-          rS(ref.current!, sel);
+          saveSelection(ref.current!);
+          updateEditorState(ref.current!.innerText);
         }}
       />
     </div>
@@ -119,7 +114,7 @@ export function TextEditor(props: { config: EditorConfig }) {
         lexer: new LexerWrapper(),
         tokens: [],
         grid: { rows: [] },
-        selection: { start: 0, end: 0, collapsed: true },
+        selection: null,
       }}>
       <EditorWrapper {...props.config} />
     </CanvasProvider>

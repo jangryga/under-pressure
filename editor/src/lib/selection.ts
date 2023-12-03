@@ -1,10 +1,10 @@
 import invariant from "./utils/invariant";
 
-class SelectionNode {
+export class SelectionNode {
   public name: string;
   public children: SelectionNode[] | undefined;
   public value: string | undefined;
-  public rangeInfo:
+  public rangeMarker:
     | {
         rangeStart?: boolean;
         rangeStartOffset?: number;
@@ -15,15 +15,15 @@ class SelectionNode {
 
   constructor(node: Node, domRange: Range) {
     if (domRange.startContainer === node) {
-      this.rangeInfo = {
-        ...this.rangeInfo,
+      this.rangeMarker = {
+        ...this.rangeMarker,
         rangeStart: true,
         rangeStartOffset: domRange.startOffset,
       };
     }
     if (domRange.endContainer === node) {
-      this.rangeInfo = {
-        ...this.rangeInfo,
+      this.rangeMarker = {
+        ...this.rangeMarker,
         rangeEnd: true,
         rangeEndOffset: domRange.endOffset,
       };
@@ -54,7 +54,7 @@ class SelectionNode {
 
     if (node.childNodes) {
       this.children = [];
-      if (!this.rangeInfo?.rangeEnd) {
+      if (!this.rangeMarker?.rangeEnd) {
         for (const ch of node.childNodes) {
           const chn = new SelectionNode(ch, domRange);
           this.children.push(chn);
@@ -65,22 +65,13 @@ class SelectionNode {
   }
 
   containsEnd() {
-    if (this.rangeInfo?.rangeEnd) return true;
+    if (this.rangeMarker?.rangeEnd) return true;
     if (this.children) {
       for (const child of this.children) {
         if (child.containsEnd()) return true;
       }
     }
     return false;
-  }
-
-  static getRangeInfo(node: SelectionNode): SelectionNode["rangeInfo"] {
-    if (node.rangeInfo) return node.rangeInfo;
-    if (!node.children) return undefined;
-    for (const child of node.children.reverse()) {
-      const currInfo = SelectionNode.getRangeInfo(child);
-      if (currInfo) return currInfo;
-    }
   }
 }
 
@@ -90,7 +81,6 @@ function saveSelection(element: HTMLElement) {
   const range = selection.getRangeAt(0);
 
   const canvasNode = new SelectionNode(element, range);
-  // console.log(canvasNode);
   return canvasNode;
 }
 
@@ -114,12 +104,65 @@ function saveSelection(element: HTMLElement) {
  *     - no => offset is correct
  *     - yes => use beginning of next node (have to go up one level from textNode to SPAN, then take next SPAN.text)
  */
-function restoreSelection(node: Node, prevSelNode: SelectionNode): void {
+function restoreSelection(node: Node, prevSelNode: SelectionNode | null): void {
+  if (!prevSelNode) return;
+  if (prevSelNode.rangeMarker) {
+    return setDOMRange(node, node, 0, 0);
+  }
   const endNodeIdx = prevSelNode.children!.length - 1;
-  const endNodeLevel1 = prevSelNode.children![endNodeIdx];
-  invariant(endNodeLevel1.containsEnd(), "Range end expected.");
-  const rangeInfo = SelectionNode.getRangeInfo(endNodeLevel1);
-  invariant(typeof rangeInfo?.rangeStart !== undefined, "Range start expected.");
+  const fakeEndNode = prevSelNode.children![endNodeIdx];
+  invariant(fakeEndNode.containsEnd(), "Expected range end.");
+  invariant(node.childNodes.length >= endNodeIdx, "Selection out of range.");
+  const realEndNode = node.childNodes[endNodeIdx];
+  if (fakeEndNode.rangeMarker) {
+    return setDOMRange(
+      realEndNode,
+      realEndNode,
+      fakeEndNode.rangeMarker.rangeStartOffset!,
+      fakeEndNode.rangeMarker.rangeEndOffset!,
+    );
+  }
+  invariant(typeof fakeEndNode.children !== undefined, "Expected children elements.");
+  const spanIdx = fakeEndNode.children!.length - 1;
+  invariant(fakeEndNode.children![spanIdx].containsEnd(), "Expected nested range end.");
+  invariant(realEndNode.childNodes.length >= spanIdx, "Nested selection out of range.");
+  if (fakeEndNode.children![spanIdx].rangeMarker) {
+    console.warn("This only runs if content is not set.");
+    const _node = realEndNode.childNodes[spanIdx];
+    const _marker = fakeEndNode.children![spanIdx].rangeMarker;
+    return setDOMRange(_node, _node, _marker?.rangeStartOffset!, _marker?.rangeEndOffset!);
+  }
+  const spanNode = realEndNode.childNodes[spanIdx];
+  const textNode = spanNode.childNodes[0];
+  invariant(textNode.nodeType === Node.TEXT_NODE, "Expected TEXT node.");
+  const textRangeMarker = fakeEndNode.children![spanIdx].children![0].rangeMarker;
+  invariant(textRangeMarker !== undefined, "Expected textRangeMarker to be defined.");
+  if (textRangeMarker?.rangeEndOffset! > (textNode as Text).length) {
+    console.warn("Saved offset greater than text length. Walking up the tree.");
+    invariant(
+      realEndNode.childNodes.length > spanIdx + 1,
+      "[Reconciliation error] Expected extra child node on row <div>.",
+    );
+    const nextSpanNode = realEndNode.childNodes[spanIdx + 1];
+    const nextTextNode = nextSpanNode.childNodes[0];
+    return setDOMRange(nextTextNode, nextTextNode, 1, 1);
+  }
+
+  return setDOMRange(
+    textNode,
+    textNode,
+    textRangeMarker?.rangeStartOffset!,
+    textRangeMarker?.rangeEndOffset!,
+  );
+}
+
+function setDOMRange(nodeStart: Node, nodeEnd: Node, offsetStart: number, offsetEnd: number) {
+  const domSelection = document.getSelection();
+  const range = new Range();
+  range.setStart(nodeStart, offsetStart);
+  range.setEnd(nodeEnd, offsetEnd);
+  domSelection?.removeAllRanges();
+  domSelection?.addRange(range);
 }
 
 export { saveSelection, restoreSelection };
