@@ -4,6 +4,7 @@ import json
 import unittest
 import importlib
 
+EXCLUDED_PACKAGES = ["test_runner", ".git", "editor"]
 
 class TestSuite(unittest.TestCase):
     pass
@@ -12,13 +13,12 @@ class TestRunner:
 
     def __init__(self):
         self.packages = []
-        self.excluded_packages = ["test_runner", ".git"]
 
     def walk_packages(self) -> List[str]:
         print("Walking directory tree")
         for d_path, d_names, _ in os.walk("."):
             if d_path == ".":
-                self.packages = [name for name in d_names if name not in self.excluded_packages]
+                self.packages = [name for name in d_names if name not in EXCLUDED_PACKAGES]
             
     def create_tests(self):
         print("Creating tests")
