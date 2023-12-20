@@ -53,7 +53,7 @@ class TestRunner:
 
 
     def run(self):
-        print("Running...")
+        print("Starting execution...")
         self.walk_packages()
         self.create_tests()
         self.execute_tests()
