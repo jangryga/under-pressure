@@ -5,5 +5,19 @@
             "amount": 11
         },
         "output": 3
+    },
+    {
+        "input": {
+            "coins": [2],
+            "amount": 3
+        },
+        "output": -1 
+    },
+    {
+        "input": {
+            "coins": [1],
+            "amount": 0
+        },
+        "output": 0
     }
 ]
