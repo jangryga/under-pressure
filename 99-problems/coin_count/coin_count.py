@@ -1,4 +1,5 @@
 from typing import List
+
 def coin_count(coins: List[int], amount: int) -> int:
     all_coins = [float("inf") for _ in range(amount + 1)]
     all_coins[0] = 0

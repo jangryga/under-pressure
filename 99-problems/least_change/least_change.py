@@ -1,6 +1,5 @@
 from typing import List
 
-
 def least_change(coins: List[int], amount: int) -> int:
     coins.sort(reverse=True)
     memory = {0: 0}
