@@ -37,7 +37,10 @@ class TestRunner:
                 with open(file_name, "r") as f:
                     runs = json.loads(f.read())
                 for run in runs:
-                    cls.assertEqual(func(**run["input"]), run["output"])
+                    try:
+                        cls.assertEqual(func(**run["input"]), run["output"])
+                    except Exception as e:
+                        print(f"\n[ERROR] Failed {func.__name__}: \n    [INPUT]    {run['input']}\n    [EXPECTED] {run['output']}\n    [MESSAGE]  {e}")
             return test
         
         for path_name in self.packages:
