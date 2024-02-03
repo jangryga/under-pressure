@@ -1,7 +1,12 @@
 import { TokenType, LexerWrapper } from "lexer-rs";
 import { ReactNode, createContext, useCallback, useContext, useReducer } from "react";
 import { Grid, gridify } from "./canvas_grid";
-import { saveSelection as saveSelectionInternal, type SelectionNode } from "./selection";
+import {
+  restoreSelection,
+  saveSelection as saveSelectionInternal,
+  type SelectionNode,
+} from "./selection";
+import ReactDOMServer from "react-dom/server";
 
 interface CanvasContextType {
   tokens: TokenType[];
@@ -11,19 +16,22 @@ interface CanvasContextType {
 }
 type CanvasActionType =
   | { type: "SET"; payload: string }
-  | { type: "SAVE_SELECTION"; payload: { element: HTMLDivElement } };
+  | { type: "SAVE_SELECTION"; payload: { element: HTMLDivElement } }
+  | { type: "RESTORE_SELECTION"; payload: { element: HTMLDivElement } };
 type UseCanvasManagerResult = ReturnType<typeof useCanvasManager>;
 
 const CanvasContext = createContext<UseCanvasManagerResult>({
   context: null as any,
   updateTree: (_: string) => {},
   saveSelection: () => {},
+  restoreState: () => {},
 });
 
 function useCanvasManager(initialCanvasContext: CanvasContextType): {
   context: CanvasContextType;
   updateTree: (text: string) => void;
   saveSelection: (element: HTMLDivElement) => void;
+  restoreState: (element: HTMLDivElement) => void;
 } {
   const [context, dispatch] = useReducer((state: CanvasContextType, action: CanvasActionType) => {
     switch (action.type) {
@@ -43,6 +51,15 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
           grid,
         };
       }
+      case "RESTORE_SELECTION": {
+        const element = action.payload.element;
+        element.innerHTML = ReactDOMServer.renderToString(
+          <>{state.grid.rows.map((row) => row.elements)}</>,
+        );
+        restoreSelection(element, state.selection);
+        return { ...state };
+      }
+
       default:
         throw new Error("unimplemented");
     }
@@ -56,7 +73,11 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
     dispatch({ type: "SAVE_SELECTION", payload: { element } });
   }, []);
 
-  return { context, updateTree, saveSelection };
+  const restoreState = useCallback((element: HTMLDivElement) => {
+    dispatch({ type: "RESTORE_SELECTION", payload: { element } });
+  }, []);
+
+  return { context, updateTree, saveSelection, restoreState };
 }
 
 export const CanvasProvider = ({
@@ -84,4 +105,9 @@ export const useSaveEditorSelection = (): UseCanvasManagerResult["saveSelection"
 export const useEditorContext = (): UseCanvasManagerResult["context"] => {
   const { context } = useContext(CanvasContext);
   return context;
+};
+
+export const useRestoreSelection = (): UseCanvasManagerResult["restoreState"] => {
+  const { restoreState } = useContext(CanvasContext);
+  return restoreState;
 };

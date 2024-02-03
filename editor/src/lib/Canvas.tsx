@@ -4,27 +4,19 @@ import {
   useEditorContext,
   useUpdateUpdateEditorState,
   useSaveEditorSelection,
+  useRestoreSelection,
 } from "./canvas_context";
 import { useEffect, useRef } from "react";
-import ReactDOMServer from "react-dom/server";
-import { restoreSelection } from "./selection";
 
 function Canvas() {
-  const context = useEditorContext();
   const updateEditorState = useUpdateUpdateEditorState();
   const saveSelection = useSaveEditorSelection();
+  const restoreSelection = useRestoreSelection();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     ref.current?.focus();
   }, []);
-
-  useEffect(() => {
-    ref.current!.innerHTML = ReactDOMServer.renderToString(
-      <>{context.grid.rows.map((row) => row.elements)}</>,
-    );
-    restoreSelection(ref.current!, context.selection);
-  }, [context.grid]);
 
   return (
     <div>
@@ -39,6 +31,7 @@ function Canvas() {
         onInput={() => {
           saveSelection(ref.current!);
           updateEditorState(ref.current!.innerText);
+          restoreSelection(ref.current!);
         }}
       />
     </div>

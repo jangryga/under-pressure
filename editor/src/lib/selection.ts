@@ -1,6 +1,7 @@
 import invariant from "./utils/invariant";
+// import { invariant } from "./utils/invariant";
 
-export class SelectionNode {
+class SelectionNode {
   public name: string;
   public children: SelectionNode[] | undefined;
   public value: string | undefined;
@@ -42,14 +43,14 @@ export class SelectionNode {
           this.name = "SPAN";
           break;
         default:
-          throw Error(`Unsupported element ${element.tagName}`);
+          throw new Error(`Unsupported element ${element.tagName}`);
       }
     } else if (node.nodeType === Node.TEXT_NODE) {
       const element = node as Text;
       this.name = "TEXT";
       this.value = element.textContent!;
     } else {
-      throw Error(`Unsupported node type ${node.nodeType}`);
+      throw new Error(`Unsupported node type ${node.nodeType}`);
     }
 
     if (node.childNodes) {
@@ -80,13 +81,12 @@ function saveSelection(element: HTMLElement) {
   if (!selection) return null;
   const range = selection.getRangeAt(0);
 
-  const canvasNode = new SelectionNode(element, range);
-  return canvasNode;
+  return new SelectionNode(element, range);
 }
 
 /**
  * When there is a need for a reconciliation:
- * if there is an element <div><span>return></span></div>
+ * if there is an element <div><span>return</span></div>
  * adding a whitespace will result in:
  * ...<span>return </span>...
  * but what the renderer will produce is:
@@ -156,7 +156,7 @@ function restoreSelection(node: Node, prevSelNode: SelectionNode | null): void {
   );
 }
 
-function setDOMRange(nodeStart: Node, nodeEnd: Node, offsetStart: number, offsetEnd: number) {
+function setDOMRange(nodeStart: Node, nodeEnd: Node, offsetStart: number, offsetEnd: number): void {
   const domSelection = document.getSelection();
   const range = new Range();
   range.setStart(nodeStart, offsetStart);
@@ -165,4 +165,4 @@ function setDOMRange(nodeStart: Node, nodeEnd: Node, offsetStart: number, offset
   domSelection?.addRange(range);
 }
 
-export { saveSelection, restoreSelection };
+export { saveSelection, restoreSelection, SelectionNode };

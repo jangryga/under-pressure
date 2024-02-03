@@ -34,7 +34,6 @@ export default function App() {
                 const range = new Range();
                 range.setStart(ref.current!, 1);
                 range.setEnd(ref.current!, 2);
-                // range.collapse(true);
                 const selection = document.getSelection();
                 selection?.removeAllRanges();
                 selection?.addRange(range);
