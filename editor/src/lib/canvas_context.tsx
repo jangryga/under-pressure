@@ -13,7 +13,12 @@ interface CanvasContextType {
   lexer: LexerWrapper;
   grid: Grid;
   selection: SelectionNode | null;
+  debugger: {
+    encoder: TextEncoder | null;
+    input: number[];
+  };
 }
+
 type CanvasActionType =
   | { type: "SET"; payload: string }
   | { type: "SAVE_SELECTION"; payload: { element: HTMLDivElement } }
@@ -43,12 +48,18 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
         };
       }
       case "SET": {
+        let encoder = state.debugger.encoder ?? new TextEncoder();
+        const utf8Input = Array.from(encoder.encode(action.payload));
         const tokens = state.lexer.tokenize(action.payload);
         const grid = gridify(tokens);
         return {
           ...state,
           tokens,
           grid,
+          debugger: {
+            encoder: encoder,
+            input: utf8Input,
+          },
         };
       }
       case "RESTORE_SELECTION": {
@@ -59,7 +70,6 @@ function useCanvasManager(initialCanvasContext: CanvasContextType): {
         restoreSelection(element, state.selection);
         return { ...state };
       }
-
       default:
         throw new Error("unimplemented");
     }

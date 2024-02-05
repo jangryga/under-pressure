@@ -13,12 +13,12 @@ const style = [
   "text-red-200",
   "text-black",
   "text-black",
+  "text-#1cda10",
 ];
 
 export function renderElement(token: TokenType, key: string, CSSConfig: { useTailwind: boolean }) {
   const textColor = style[TokenCategory[token.category as any] as any];
-  // @ts-ignore
-  switch (TokenKind[token.kind]) {
+  switch (TokenKind[token.kind as keyof typeof TokenKind]) {
     case 1: {
       console.error("Dedent detected");
       return <span />;

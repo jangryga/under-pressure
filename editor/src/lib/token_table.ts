@@ -190,11 +190,8 @@ const tokenTable = ["    ", "", "'''",
   "whitespace"
 ]
 
-import { TokenKind } from "lexer-rs";
-
 export function tokenLookup(index: number): string {
   if (index === 1) throw new Error("Dedents not allowed");
-  else if (index in []) throw new Error();
   else if (index > 190) throw new Error("Index of bounds");
   return tokenTable[index];
 }
