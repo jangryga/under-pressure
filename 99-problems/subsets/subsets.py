@@ -1,12 +1,17 @@
 from typing import List
 
 def subsets(nums: List[int]) -> List[List[int]]:
-    subsets = [[]]
-    for i in range(len(nums)):
-        subsets.extend(subsets(nums, i+1))
+    sets = [[]]
 
-    return subsets
+    def helper(sets, arr, start_idx):
+        if start_idx == len(nums): return
 
+        helper(sets, [n for n in arr], start_idx + 1)
+        cp = [n for n in arr]
+        cp.append(nums[start_idx])
+        sets.append(cp)
+        helper(sets, cp, start_idx +1)
 
-def get_combinations(array: List[int], l: int) -> List[List[int]]:
-    return []
+    helper(sets, [], 0)
+
+    return sets
