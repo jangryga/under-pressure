@@ -1,6 +1,6 @@
 from typing import List
 
-def avg_array_point(array: List[int]) -> int:
+def equilibrium_index(array: List[int]) -> int:
     total_sum = sum(array)
     left_sum = 0
     
